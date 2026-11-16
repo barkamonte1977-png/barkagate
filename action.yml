@@ -1,0 +1,33 @@
+name: "BarkaGate - AI crawler access check"
+description: "Fails the build when AI search/answer bots are blocked by robots.txt, a firewall or CDN."
+branding:
+  icon: "shield"
+  color: "yellow"
+inputs:
+  url:
+    description: "Page to check, e.g. https://example.com/"
+    required: true
+  bots:
+    description: "Optional comma-separated subset of bots"
+    required: false
+    default: ""
+  strict-training:
+    description: "Also fail when training crawlers (GPTBot, ClaudeBot, CCBot...) are blocked"
+    required: false
+    default: "false"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - shell: bash
+      env:
+        BG_URL: ${{ inputs.url }}
+        BG_BOTS: ${{ inputs.bots }}
+        BG_STRICT: ${{ inputs.strict-training }}
+      run: |
+        args=("$BG_URL" --no-color)
+        if [ -n "$BG_BOTS" ]; then args+=(--bots "$BG_BOTS"); fi
+        if [ "$BG_STRICT" = "true" ]; then args+=(--strict-training); fi
+        cd "$GITHUB_ACTION_PATH" && python -m barkagate "${args[@]}"
