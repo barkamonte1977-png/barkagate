@@ -14,7 +14,7 @@ BarkaGate keeps **search/answer bots** (which can cite you) apart from **trainin
 ## Get started in 1 minute
 
 ```bash
-pip install .            # Python 3.10+, no dependencies
+pip install git+https://github.com/barkamonte1977-png/barkagate            # Python 3.10+, no dependencies
 barkagate https://example.com/
 ```
 
@@ -63,7 +63,7 @@ Training crawlers opted out (informational): GPTBot, CCBot
 ## GitHub Action
 
 ```yaml
-- uses: OWNER/barkagate@v0   # replace OWNER once published
+- uses: barkamonte1977-png/barkagate@v0
   with:
     url: https://example.com/
     # bots: "OAI-SearchBot,Claude-SearchBot,PerplexityBot"
