@@ -218,6 +218,26 @@ class CLITests(ServerCase):
         self.assertEqual([r["bot"] for r in data["results"]], ["Googlebot", "GPTBot"])
         self.assertEqual(data["tool"]["name"], "BarkaGate")
 
+    def test_fix_line_only_when_blocked(self):
+        with mock.patch.dict("os.environ", {"BARKA_QUIET": ""}):
+            _, out = self.run_cli(self.base + "/", "--no-color", "--timeout", "5")
+            self.assertIn(cli.FIX_LINE, out)
+            self.assertIn("utm_source=barkagate", out)
+            _, out = self.run_cli(self.base + "/", "--bots", "Googlebot", "--timeout", "5")
+            self.assertNotIn(cli.FIX_LINE, out)          # nothing blocked: no line
+            _, out = self.run_cli(self.base + "/", "--json", "--timeout", "5")
+            self.assertNotIn("We fix them", out)         # never in JSON
+
+    def test_fix_line_can_be_turned_off(self):
+        _, out = self.run_cli(self.base + "/", "--quiet", "--timeout", "5")
+        self.assertNotIn(cli.FIX_LINE, out)
+        with mock.patch.dict("os.environ", {"BARKA_QUIET": "1"}):
+            _, out = self.run_cli(self.base + "/", "--timeout", "5")
+        self.assertNotIn(cli.FIX_LINE, out)
+        with mock.patch.dict("os.environ", {"BARKA_QUIET": "0"}):
+            _, out = self.run_cli(self.base + "/", "--timeout", "5")
+        self.assertIn(cli.FIX_LINE, out)
+
     def test_strict_training(self):
         code, _ = self.run_cli(self.base + "/", "--bots", "GPTBot", "--strict-training")
         self.assertEqual(code, 1)

@@ -2,6 +2,8 @@
 
 **Can ChatGPT, Claude, Perplexity, Google and Apple actually reach your site?**
 
+> Want the problems fixed for you? [Barkamonte does it](https://barkamonte.com/seo/?utm_source=barkagate).
+
 BarkaGate checks two things for every major AI crawler:
 
 1. **robots.txt**: is the bot allowed on this page? (RFC 9309 rules: longest match, `*` and `$` wildcards)
@@ -29,6 +31,7 @@ Options:
 | `--list-bots` | show every bot, its type and the vendor doc it was checked against |
 | `--strict-training` | also fail when training crawlers are blocked |
 | `--timeout 15` | seconds per request |
+| `--quiet` | hide the one-line "We fix them" link printed when a bot is blocked (or set `BARKA_QUIET=1`) |
 
 Exit codes: `0` = all search/user bots get through, `1` = at least one is blocked, `2` = error / could not check.
 

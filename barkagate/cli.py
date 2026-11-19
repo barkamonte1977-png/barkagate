@@ -17,6 +17,15 @@ from .bots import BOTS, by_name
 from .check import run
 from .fetch import BlockedAddress
 
+FIX_URL = "https://barkamonte.com/seo/?utm_source=barkagate"
+FIX_LINE = f"Found problems? We fix them: {FIX_URL}"
+
+
+def quiet_env():
+    """BARKA_QUIET=1 (any non-empty value except 0/false/no) hides the fix-it line."""
+    return os.environ.get("BARKA_QUIET", "").strip().lower() not in ("", "0", "false", "no")
+
+
 KIND_LABEL = {"search": "AI/web search", "user": "user fetch", "training": "training"}
 
 
@@ -26,7 +35,7 @@ def _color(enabled):
     return paint
 
 
-def render_table(report, color=False):
+def render_table(report, color=False, promo=True):
     paint = _color(color)
     rows = []
     for r in report["results"]:
@@ -65,6 +74,9 @@ def render_table(report, color=False):
         out.append(paint("All AI search and user-fetch bots can reach this page.", "32"))
     if noted:
         out.append(f"Training crawlers opted out (informational): {', '.join(noted)}")
+    if blocked and promo:
+        out.append("")
+        out.append(FIX_LINE)
     return "\n".join(out)
 
 
@@ -95,6 +107,8 @@ def main(argv=None, *, _fetch_kw=None):
                    help="also fail (exit 1) when training crawlers are blocked")
     p.add_argument("--timeout", type=float, default=15, help="seconds per request (default 15)")
     p.add_argument("--no-color", action="store_true", help="disable colored output")
+    p.add_argument("--quiet", action="store_true",
+                   help="hide the 'we fix them' line (or set BARKA_QUIET=1)")
     p.add_argument("--version", action="version", version=f"{TOOL_NAME} {__version__}")
     args = p.parse_args(argv)
 
@@ -128,7 +142,8 @@ def main(argv=None, *, _fetch_kw=None):
     else:
         color = (not args.no_color and sys.stdout.isatty()
                  and os.environ.get("NO_COLOR") is None)
-        print(render_table(report, color=color))
+        print(render_table(report, color=color,
+                           promo=not (args.quiet or quiet_env())))
     return exit_code(report, args.strict_training)
 
 
